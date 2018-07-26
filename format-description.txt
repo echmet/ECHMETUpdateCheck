@@ -1,0 +1,40 @@
+ECHMET Update list format description.
+
+- The list is distributed in JSON format.
+- All string operations are case insensitive.
+- The root item is a JSON object
+  containing field "software".
+- Field "software" is an array of objects.
+- Each object of the "software" array shall contain the following fields:
+    - "name"     -> String defining software's name. The string shall not be
+                    empty or longer that 32 characters.
+    - "link"     -> String contaning download link to the most recent software
+                    version. The string shall not be empty.
+    - "versions" -> Array of objects describing the software's version history.
+
+- Each object in of the "versions" array shall contain the following fields:
+    - "major"    -> Integer, major version number
+    - "minor"    -> Integer, minor version number
+    - "revision" -> String, revision. The string may be up to 4 characters
+                    long and shall contain only base letters (a-z)
+                    and numbers (0-9). More specific rules concerning revision
+                    strings are given below.
+
+Version comparison rules:
+    1) Major version
+    2) Minor version
+    3) Revision
+
+Revision comparison rules:
+    Comparison is case insensitive. Significance of each character is given by
+    its position in the ASCII table. Weight of each character decreases with
+    its increasing position in the revision string. Empty string has
+    the lowest significance. First character in the revision string shall be
+    a letter. Second to fourth characters may also be digits.
+
+    Examples:
+    "a" > ""
+    "b" > "a"
+    "b1" > "b"
+    "ba" > "b9"
+    "c" > "bb"
