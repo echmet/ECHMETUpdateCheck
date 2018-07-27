@@ -1,5 +1,3 @@
-#! /usr/bin/python3
-
 from ctypes import byref, c_int, c_char, c_char_p, Structure, CDLL, POINTER
 import enum
 
