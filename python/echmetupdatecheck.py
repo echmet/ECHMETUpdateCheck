@@ -45,6 +45,11 @@ class ECHMETUpdateCheck:
     """Wrapper around `libECHMETUpdateCheck` library
     """
 
+    class ErrorType(enum.Enum):
+        NO_ERROR = 1,
+        NETWORK_ERROR = 2
+        PROCESSING_ERROR = 3
+
     class UpdateState(enum.Enum):
         UP_TO_DATE = 1
         UPDATE_AVAILABLE = 2
@@ -192,18 +197,50 @@ class ECHMETUpdateCheck:
         return ret >= 0x200
 
     @staticmethod
+    def internal_is_network_error(ret):
+        """Checks whether `ECHMETUpdateCheck` return code represents
+        a network error state.
+
+        Args:
+            ret (int): `ECHMETUpdateCheck` return code
+
+        Returns:
+            True if the code is a network error, False otherwise.
+        """
+
+        return ret >= 0x300 and ret < 0x400
+
+    @staticmethod
     def internal_is_warning(ret):
         """Checks whether `ECHMETUpdateCheck` return code represents
         a warning state.
 
         Args:
-            ret (int): ``ECHMETUpdateCheck`` return code.
+            ret (int): `ECHMETUpdateCheck` return code.
 
         Returns:
             True if the code is a warning, False otherwise.
         """
 
         return ret >= 0x100 and ret < 0x200
+
+    @staticmethod
+    def error_type(ret):
+        """Converts library return code to an error class. Warning is
+        not considered an error.
+
+        Args:
+            ret (int): `ECHMETUpdateCheck` return code.
+
+        Returns:
+            :obj:ErrorType of the corresponding error type.
+        """
+
+        if ECHMETUpdateCheck.internal_is_network_error(ret):
+            return ECHMETUpdateCheck.ErrorType.NETWORK_ERROR
+        elif ECHMETUpdateCheck.internal_is_error(ret):
+            return ECHMETUpdateCheck.ErrorType.PROCESSING_ERROR
+        return ECHMETUpdateCheck.ErrorType.NO_ERROR
 
     def lib_to_usr_status(self, res):
         if res == LIB_EUST_UP_TO_DATE:
