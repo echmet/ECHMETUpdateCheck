@@ -55,6 +55,7 @@ class ECHMETUpdateCheck:
         UPDATE_AVAILABLE = 2
         UPDATE_RECOMMENDED = 3
         UPDATE_REQUIRED = 4
+        UNKNOWN = 5
 
     class InvalidInputError(Exception):
         def __init__(self, msg):
@@ -139,9 +140,13 @@ class ECHMETUpdateCheck:
         """Update check result descriptor.
 
         Attributes:
-            status (:obj:UpdateStatus): Result of update check.
+            status (:obj:UpdateState): Result of update check.
             version (:obj:Version): Latest available version of the software.
-            link (str): Download link for the latest available version.
+                                    This attribute may be `None` if the status is
+                                    `UpdateState.UNKNOWN`.
+            link (str): Download link for the latest available version. It may be an
+                        empty string if there is no update available or if the state
+                        is unknown.
         """
 
         def __init__(self, status, version, link):
@@ -251,6 +256,8 @@ class ECHMETUpdateCheck:
             return self.UpdateState.UPDATE_RECOMMENDED
         if res == LIB_EUST_REQUIRED:
             return self.UpdateState.UPDATE_REQUIRED
+        if res == LIB_EUST_UNKWOWN:
+            return self.UpdateState.UNKNOWN
 
         raise ECHMETUpdateCheck.InvalidOutputError('Unknown value of '
                                                    'update status')
@@ -287,7 +294,8 @@ class ECHMETUpdateCheck:
             return (False, ret, None)
 
         if res.status == LIB_EUST_UNKWOWN:
-            return (False, ret, None)
+            return (True, ret, self.Result(self.UpdateState.UNKNOWN,
+                                            None, ''))
 
         usr_res = self.Result(self.lib_to_usr_status(res.status),
                               self.Version(res.version.major,
@@ -349,17 +357,19 @@ class ECHMETUpdateCheck:
         results_out = []
         for idx in range(0, num_results.value):
             raw_res = results[idx]
-            if raw_res.status == LIB_EUST_UNKWOWN:
-                continue
+            res = None
 
-            res = (software_list[idx].name.decode('ASCII'),
-                   self.Result(self.lib_to_usr_status(raw_res.status),
-                               self.Version(raw_res.version.major,
-                                            raw_res.version.minor,
-                                            raw_res.version.revision
-                                            .decode('ASCII')),
-                               raw_res.link.decode('UTF-8'))
-                   )
+            if raw_res.status == LIB_EUST_UNKWOWN:
+                res = self.Result(self.UpdateState.UNKNOWN, None, '')
+            else:
+                res = (software_list[idx].name.decode('ASCII'),
+                       self.Result(self.lib_to_usr_status(raw_res.status),
+                                   self.Version(raw_res.version.major,
+                                                raw_res.version.minor,
+                                                raw_res.version.revision
+                                                .decode('ASCII')),
+                                   raw_res.link.decode('UTF-8'))
+                       )
             results_out.append(res)
 
         self.lib_obj.updater_free_result_list(results, num_results)
