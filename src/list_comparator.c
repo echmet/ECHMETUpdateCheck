@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #define COMP_NUM(l, r) \
 	if (l > r) return VER_NEWER; \
@@ -13,7 +12,6 @@
 #define LTR_TO_LWR(l, v) \
 	if (isalpha(l)) v = tolower(l); \
 	else v = l
-
 
 typedef enum _VersionDiff {
 	VER_OLDER,
@@ -88,7 +86,7 @@ EUPDRetCode comparator_compare(const struct SoftwareList *sw_list, const struct 
 	for (idx = 0; idx < sw_list->length; idx++) {
 		const struct Software *sw = &sw_list->items[idx];
 
-		if (!strncasecmp(sw->name, checked_sw->name, STRUCT_MEM_SZ(struct Software, name))) {
+		if (!STRNICMP(sw->name, checked_sw->name, STRUCT_MEM_SZ(struct Software, name))) {
 			size_t jdx;
 			Severity severity = SEV_FEATURE;
 			int update_available = 0;

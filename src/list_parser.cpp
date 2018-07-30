@@ -4,7 +4,6 @@
 
 #include <cstring>
 #include <echmetupdatecheck.h>
-#include <strings.h>
 
 #ifdef EUPD_ENABLE_DIAGNOSTICS
 #include <iostream>
@@ -260,7 +259,7 @@ EUPDRetCode parser_set_link(const struct SoftwareList *sw_list, const char *name
 	for (size_t idx = 0; idx < sw_list->length; idx++) {
 		const auto sw = &sw_list->items[idx];
 
-		if (!strncasecmp(name, sw->name, name_len)) {
+		if (!STRNICMP(name, sw->name, name_len)) {
 			result->link = static_cast<char *>(malloc(strlen(sw->link) + 1));
 			if (result->link == nullptr)
 				return EUPD_E_NO_MEMORY;

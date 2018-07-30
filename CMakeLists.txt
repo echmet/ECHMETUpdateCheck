@@ -15,6 +15,8 @@ if (EUPD_ENABLE_DIAGNOSTICS)
 endif ()
 
 if (WIN32)
+    option(EUPD_EXTERNAL_CURL "Use custom path to libcurl library" ON)
+
     set("ECHMET_PLATFORM_WIN32" "1")
 
     if (MINGW)
@@ -28,6 +30,8 @@ if (WIN32)
         message(FATAL "Unsupported or mistedected compiler")
     endif ()
 elseif (UNIX)
+    option(EUPD_EXTERNAL_CURL "Use custom path to libcurl library" OFF)
+
     set("ECHMET_PLATFORM_UNIX" "1")
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -40,7 +44,7 @@ elseif (UNIX)
         set(DEFAULT_SYMVER_LINK "-Wl,--default-symver")
     elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
         if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
-		message(FATAL_ERROR "Clang 3.4 or newer is required to build libECHMETUpdateCheck")
+            message(FATAL_ERROR "Clang 3.4 or newer is required to build libECHMETUpdateCheck")
 	endif ()
 
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -std=c++14 -Wall -Wextra -Wno-c++98-compat -pedantic -fvisibility=hidden -g")
@@ -65,8 +69,19 @@ set(libECHMETUpdateCheck_SRCS
     src/list_parser.cpp
     src/list_comparator.c)
 
-set(EUPDCHK_LINK_LIBS
-    curl)
+if (EUPD_EXTERNAL_CURL)
+    link_directories("${LIBCURL_DIR}/lib")
+    include_directories(${INCLUDE_DIRECTORIES}
+                        "${LIBCURL_DIR}/include")
+endif ()
+
+if (WIN32)
+    set(EUPDCHK_LINK_LIBS
+        libcurl)
+else ()
+    set(EUPDCHK_LINK_LIBS
+        libcurl)
+endif ()
 
 add_library(ECHMETUpdateCheck SHARED ${libECHMETUpdateCheck_SRCS})
 target_include_directories(ECHMETUpdateCheck PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")

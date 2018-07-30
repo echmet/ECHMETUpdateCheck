@@ -2,6 +2,18 @@
 #define ECHMET_UPDATECHECK_P_H
 
 #include <stddef.h>
+#include <echmetupdatecheck_config.h>
+
+#ifdef ECHMET_PLATFORM_UNIX
+	#include <strings.h>
+	#define STRNICMP strncasecmp
+#elif defined ECHMET_PLATFORM_WIN32
+	#define WIN32_LEAN_AND_MEAN
+	#include <Windows.h>
+	#define STRNICMP _strnicmp
+#else
+	#error "Unsupported or misdetected platform"
+#endif /* ECHMET_PLATFORM */
 
 #define STRUCT_MEM_SZ(t, m) (sizeof(((t *)0)->m))
 

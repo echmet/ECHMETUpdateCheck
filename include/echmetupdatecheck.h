@@ -7,7 +7,7 @@
 /* Enforce calling convention */
 #ifndef ECHMET_CC
 	#if defined ECHMET_PLATFORM_WIN32
-		#define ECHMET_CC __stdcall
+		#define ECHMET_CC __cdecl
 	#elif defined ECHMET_PLATFORM_UNIX
 		#ifdef ECHMET_COMPILER_GCC_LIKE
 			#ifdef __i386__
