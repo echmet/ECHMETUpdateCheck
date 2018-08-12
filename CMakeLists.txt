@@ -80,7 +80,7 @@ if (WIN32)
         libcurl)
 else ()
     set(EUPDCHK_LINK_LIBS
-        libcurl)
+        curl)
 endif ()
 
 add_library(ECHMETUpdateCheck SHARED ${libECHMETUpdateCheck_SRCS})
