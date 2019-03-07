@@ -185,8 +185,8 @@ ECHMET_API EUPDRetCode ECHMET_CC updater_check(const char *url, const struct EUP
  * @param[out] results Pointer to the array of results. The array will have the same ordering as
  *                     as \p in_software_list array. Value of \p results is defined only if
  *                     this function does not return an error.
- * @pararm[out] num_results Number of items if the \p results array. This number may be lower than
- *                          \p num_software in case the function succeeds only partially.
+ * @param[out] num_results Number of items if the \p results array. This number may be lower than
+ *                         \p num_software in case the function succeeds only partially.
  * @param[in] allow_insecure Allow HTTP and ignore TLS errors. This is dangerous and shall not be used
  *                           in production.
  *
