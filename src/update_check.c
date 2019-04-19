@@ -92,8 +92,11 @@ EUPDRetCode make_list(struct SoftwareList *sw_list, const char *url, const int a
 	EUPDRetCode tRet;
 
 	tRet = fetch(&dl_list, url, allow_insecure);
-	if (EUPD_IS_ERROR(tRet))
+	if (EUPD_IS_ERROR(tRet)) {
+		fetcher_list_cleanup(&dl_list);
+
 		return tRet;
+	}
 
 	tRet = parser_parse(dl_list.list, sw_list);
 	fetcher_list_cleanup(&dl_list);
