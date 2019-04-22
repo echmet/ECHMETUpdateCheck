@@ -22,8 +22,11 @@ void fetcher_cleanup(void);
  * @param[out] list Result of the operation.
  * @param[in] URL of the file to download.
  * @param[in] allow_insecure Allow HTTP and ignore TLS errors
+ * @param[in] user_agent String to use as user agent. If <tt>NULL</tt>, no user agent
+ *                       string is set.
  */
-EUPDRetCode fetcher_fetch(struct DownloadedList *list, const char *url, const int allow_insecure);
+EUPDRetCode fetcher_fetch(struct DownloadedList *list, const char *url, const int allow_insecure,
+			  const char *user_agent);
 
 /*!
  * Initializes fetcher's internal resources

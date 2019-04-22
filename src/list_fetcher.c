@@ -133,7 +133,8 @@ void fetcher_cleanup(void)
 	curl_global_cleanup();
 }
 
-EUPDRetCode fetcher_fetch(struct DownloadedList *list, const char *url, const int allow_insecure)
+EUPDRetCode fetcher_fetch(struct DownloadedList *list, const char *url, const int allow_insecure,
+			  const char *user_agent)
 {
 	EUPDRetCode ret;
 	CURLcode curl_ret;
@@ -165,6 +166,9 @@ EUPDRetCode fetcher_fetch(struct DownloadedList *list, const char *url, const in
 			goto err_out;
 		}
 	}
+
+	if (user_agent != NULL)
+		curl_easy_setopt(s.connection, CURLOPT_USERAGENT, user_agent);
 
 	curl_ret = curl_easy_perform(s.connection);
 	switch (curl_ret) {

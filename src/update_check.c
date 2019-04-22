@@ -5,10 +5,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef EUPD_ENABLE_DIAGNOSTICS
 #include <stdio.h>
-#endif /* EUPD_ENABLE_DIAGNOSTICS */
 
 #define _STRINGIFY(input) #input
 #define ERROR_CODE_CASE(erCase) case erCase: return _STRINGIFY(erCase)
@@ -54,21 +51,75 @@ int check_input(const struct EUPDInSoftware *sw)
 }
 
 /*!
+ * \brief Builds user agent string
+ *
+ * Builds user agent string based on the ID of the software that
+ * requests the update check. If no such information is pertitnent this value
+ * may be <tt>NULL</tt>. In this case only the ID of the update check library
+ * is returned in user agent string.
+ *
+ * @param[in] in_software ID of software requesting update check. This may be <tt>NULL</tt>
+ *                        if no such information is available.
+ *
+ * @retval Pointer to user agent string on success
+ * @retval <tt>NULL</tt> on failure
+ */
+static
+char * make_user_agent_str(const struct EUPDInSoftware *in_software)
+{
+	static const char *PREFIX = "ECHMETUpdateCheck";
+	const size_t MAX_SIZE = 64;
+
+	char *user_agent = malloc(MAX_SIZE);
+	if (user_agent == NULL)
+		return NULL;
+
+	memset(user_agent, 0, MAX_SIZE);
+
+	if (in_software == NULL)
+		snprintf(user_agent, MAX_SIZE, "%s", PREFIX);
+	else {
+		/* revision may not be be zero-terminated, make sure
+		 * that the string we use here is */
+		char rev_str[5];
+		memcpy(rev_str, in_software->version.revision, 4);
+		rev_str[4] = '\0';
+
+		snprintf(user_agent, MAX_SIZE, "%s - %s %d.%d.%s",
+			 PREFIX,
+			 in_software->name,
+			 in_software->version.major,
+			 in_software->version.minor,
+			 rev_str);
+	}
+
+	return user_agent;
+}
+
+/*!
  * Downloads file containing list of updates fron a given URL
  *
  * @param[out] dl_list Initialized \p DownloadedList struct
  * @param[in] url URL of the file to download
  * @param[in] allow_insecure Allow HTTP and ignore TLS errors
+ * @param[in] in_software ID of software requesting update check. This may be <tt>NULL</tt>
+ *                        if no such information is available.
  *
  * @return EUPD_OK on success, appropriate error code oterwise
  */
 static
-EUPDRetCode fetch(struct DownloadedList *dl_list, const char *url, const int allow_insecure)
+EUPDRetCode fetch(struct DownloadedList *dl_list, const char *url, const int allow_insecure,
+		  const struct EUPDInSoftware *in_software)
 {
 	EUPDRetCode tRet;
 
+	char *user_agent = make_user_agent_str(in_software);
+
 	fetcher_init();
-	tRet = fetcher_fetch(dl_list, url, allow_insecure);
+
+	tRet = fetcher_fetch(dl_list, url, allow_insecure, user_agent);
+	free(user_agent);
+
 	fetcher_cleanup();
 
 	return tRet;
@@ -80,18 +131,21 @@ EUPDRetCode fetch(struct DownloadedList *dl_list, const char *url, const int all
  * @param[out] sw_list Initialized \p SoftwareList struct
  * @param[in] url URL of the file to download.
  * @param[in] allow_insecure Allow HTTP and ignore TLS errors
+ * @param[in] in_software ID of software requesting update check. This may be <tt>NULL</tt>
+ *                        if no such information is available.
  *
  * @retval EUPD_OK List successfully parsed
  * @retval EUPD_W_LIST_INCOMPLETE List contains invalid items and was not fully parsed
  * @return Appropriate error code if the list cannot be processed at all
  */
 static
-EUPDRetCode make_list(struct SoftwareList *sw_list, const char *url, const int allow_insecure)
+EUPDRetCode make_list(struct SoftwareList *sw_list, const char *url, const int allow_insecure,
+		      const struct EUPDInSoftware *in_software)
 {
 	struct DownloadedList dl_list;
 	EUPDRetCode tRet;
 
-	tRet = fetch(&dl_list, url, allow_insecure);
+	tRet = fetch(&dl_list, url, allow_insecure, in_software);
 	if (EUPD_IS_ERROR(tRet)) {
 		fetcher_list_cleanup(&dl_list);
 
@@ -177,7 +231,7 @@ EUPDRetCode ECHMET_CC updater_check(const char *url, const struct EUPDInSoftware
 	memset(&sw_list, 0, sizeof(struct SoftwareList));
 	memset(result, 0, sizeof(struct EUPDResult));
 
-	tRet = make_list(&sw_list, url, allow_insecure);
+	tRet = make_list(&sw_list, url, allow_insecure, in_software);
 	if (EUPD_IS_ERROR(tRet))
 		goto out;
 
@@ -204,7 +258,7 @@ EUPDRetCode ECHMET_CC updater_check_many(const char *url, const struct EUPDInSof
 	memset(&sw_list, 0, sizeof(struct SoftwareList));
 	*num_results = 0;
 
-	tRet = make_list(&sw_list, url, allow_insecure);
+	tRet = make_list(&sw_list, url, allow_insecure, NULL);
 	if (EUPD_IS_ERROR(tRet))
 		goto err_out;
 
