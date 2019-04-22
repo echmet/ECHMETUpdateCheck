@@ -85,7 +85,7 @@ char * make_user_agent_str(const struct EUPDInSoftware *in_software)
 		memcpy(rev_str, in_software->version.revision, 4);
 		rev_str[4] = '\0';
 
-		snprintf(user_agent, MAX_SIZE, "%s - %s %d.%d.%s",
+		snprintf(user_agent, MAX_SIZE, "%s - %s %d.%d%s",
 			 PREFIX,
 			 in_software->name,
 			 in_software->version.major,
