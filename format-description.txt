@@ -38,3 +38,4 @@ Revision comparison rules:
     "b1" > "b"
     "ba" > "b9"
     "c" > "bb"
+    "a9" > "a10" (!!!)
