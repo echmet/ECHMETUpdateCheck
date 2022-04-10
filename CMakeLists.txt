@@ -8,6 +8,21 @@ endif ()
 
 option(EUPD_ENABLE_DIAGNOSTICS "Enable verbose diagnostic output" OFF)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
+if (UNIX)
+    include(GNUInstallDirs)
+elseif (WIN32)
+    set(CMAKE_INSTALL_LIBDIR "lib")
+    set(CMAKE_INSTALL_INCLUDEDIR "include")
+    set(CMAKE_INSTALL_BINDIR "bin")
+endif ()
+
 add_definitions("-DECHMET_DLL_BUILD")
 
 if (EUPD_ENABLE_DIAGNOSTICS)
@@ -38,8 +53,8 @@ elseif (UNIX)
         if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9.2)
             message(FATAL_ERROR "GCC 4.9.2 or newer is required to build libECHMETUpdateCheck")
 	endif ()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -std=c++14 -Wall -Wextra -pedantic -fvisibility=hidden -g")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -std=c99 -Wall -Wextra -pedantic -fvisibility=hidden -g")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wall -Wextra -pedantic -fvisibility=hidden -g")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -Wextra -pedantic -fvisibility=hidden -g")
         add_definitions("-DECHMET_COMPILER_GCC_LIKE")
         set(DEFAULT_SYMVER_LINK "-Wl,--default-symver")
     elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
@@ -47,8 +62,8 @@ elseif (UNIX)
             message(FATAL_ERROR "Clang 3.4 or newer is required to build libECHMETUpdateCheck")
 	endif ()
 
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -std=c++14 -Wall -Wextra -Wno-c++98-compat -pedantic -fvisibility=hidden -g")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -std=c99 -Wall -Wextra -pedantic -fvisibility=hidden -g")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wall -Wextra -Wno-c++98-compat -pedantic -fvisibility=hidden -g")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe -Wall -Wextra -pedantic -fvisibility=hidden -g")
         add_definitions("-DECHMET_COMPILER_GCC_LIKE")
         set(DEFAULT_SYMVER_LINK "-Wl,--default-symver")
     else ()
@@ -93,22 +108,10 @@ set_target_properties(ECHMETUpdateCheck
 target_link_libraries(ECHMETUpdateCheck
                       PRIVATE ${EUPDCHK_LINK_LIBS})
 
-if (WIN32)
-    install(TARGETS ECHMETUpdateCheck
-            RUNTIME DESTINATION lib
-            ARCHIVE DESTINATION lib
-            PUBLIC_HEADER DESTINATION include)
-else ()
-    install(TARGETS ECHMETUpdateCheck
-            LIBRARY DESTINATION lib
-            PUBLIC_HEADER DESTINATION include)
-endif ()
-if (WIN32)
-    if (MINGW OR MSYS)
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libECHMETUpdateCheck.lib" DESTINATION lib RENAME ECHMETUpdateCheck.lib)
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libECHMETUpdateCheck.dll" DESTINATION lib RENAME ECHMETUpdateCheck.dll)
-    endif ()
-endif ()
+install(TARGETS ECHMETUpdateCheck
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/echmetupdatecheck_config.h"
-        DESTINATION include)
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
