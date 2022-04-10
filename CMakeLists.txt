@@ -36,8 +36,10 @@ if (WIN32)
 
     if (MINGW)
         add_definitions("-DECHMET_COMPILER_MINGW")
+        set(DEFAULT_SYMVER_LINK "-Wl,--default-symver")
     elseif (MSYS)
         add_definitions("-DECHMET_COMPILER_MSYS")
+        set(DEFAULT_SYMVER_LINK "-Wl,--default-symver")
     elseif (MSVC)
         add_definitions("-DECHMET_COMPILER_MSVC")
         set(DEFAULT_SYMVER_LINK " ")
@@ -104,7 +106,7 @@ set_target_properties(ECHMETUpdateCheck
                       PROPERTIES VERSION 0.1
                                  SOVERSION 0.1
                                  LINK_FLAGS ${DEFAULT_SYMVER_LINK}
-                      PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/echmetupdatecheck.h")
+                                 PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/echmetupdatecheck.h")
 target_link_libraries(ECHMETUpdateCheck
                       PRIVATE ${EUPDCHK_LINK_LIBS})
 
