@@ -43,9 +43,17 @@ if (WIN32)
 
     if (MINGW)
         add_definitions("-DECHMET_COMPILER_MINGW")
+        if (ECHMET_FORCE_WINXP)
+            add_definitions("-D_USING_V110_SDK71_")
+        endif ()
+
         set(DEFAULT_SYMVER_LINK "-Wl,--default-symver")
     elseif (MSYS)
         add_definitions("-DECHMET_COMPILER_MSYS")
+        if (ECHMET_FORCE_WINXP)
+            add_definitions("-D_USING_V110_SDK71_")
+        endif ()
+
         set(DEFAULT_SYMVER_LINK "-Wl,--default-symver")
     elseif (MSVC)
         add_definitions("-DECHMET_COMPILER_MSVC")
