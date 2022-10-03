@@ -15,6 +15,10 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+if (WIN32)
+    option(ECHMET_FORCE_WINXP "Define target Windows version to Windows XP")
+endif ()
+
 if (UNIX)
     include(GNUInstallDirs)
 elseif (WIN32)
@@ -33,6 +37,9 @@ if (WIN32)
     option(EUPD_EXTERNAL_CURL "Use custom path to libcurl library" ON)
 
     set("ECHMET_PLATFORM_WIN32" "1")
+    if (ECHMET_FORCE_WINXP)
+        add_definitions("-D_WIN32_WINNT=0x0501")
+    endif ()
 
     if (MINGW)
         add_definitions("-DECHMET_COMPILER_MINGW")
